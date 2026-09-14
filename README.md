@@ -53,6 +53,24 @@ server's declared contract.
 Tool parts render as distinct cards for each AI SDK state: *input-streaming*, *input-available*,
 *output-available*, and *output-error*.
 
+## Testing (FE-09)
+
+Tests are the contract for verified AI-assisted changes. Every component is
+queried the way a user queries the page (role/label, never test IDs), the AI
+route is always mocked at the transport boundary (`@ai-sdk/react` in Vitest,
+`page.route` in Playwright) so the real Gemini API is never called, and
+`npm run lint`, `npm run build`, `npm run test` and `npm run e2e` all run in
+CI on push and block the merge.
+
+- `components/__tests__/chat.test.tsx` — the highest-risk UI: empty, pending,
+  streaming, stop, error and retry states.
+- `components/__tests__/settings-form.test.tsx`, `task-form.test.tsx` — validated
+  forms (zod, `noValidate`, a11y attributes).
+- `components/__tests__/tool-panel.test.tsx` — tool-result component across every
+  tool-part state.
+- `e2e/chat-error.spec.ts` (mock-served failure → retry) and `e2e/chat.spec.ts`
+  (primary chat flow) cover the primary flow end-to-end.
+
 ## Repository layout
 
 ```
