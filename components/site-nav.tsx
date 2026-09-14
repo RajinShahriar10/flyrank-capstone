@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/settings", label: "Settings" },
   { href: "/profile", label: "Profile" },
   { href: "/health", label: "Health" },
+  { href: "/stream", label: "Chat" },
   { href: "/playground", label: "Playground" },
 ];
 

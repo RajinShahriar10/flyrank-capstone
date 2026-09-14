@@ -12,7 +12,10 @@
     "e2e": "playwright test"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.53",
+    "@ai-sdk/react": "^4.0.102",
     "@hookform/resolvers": "^5.0.0",
+    "ai": "^7.0.99",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.3.0",
     "lucide-react": "^1.45.0",

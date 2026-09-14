@@ -35,6 +35,7 @@ Deployed on Vercel from the `main` branch; every push also builds an isolated pr
 | `/profile` | Profile | Placeholder |
 | `/health` | Health check | Renders live data fetched from `/api/health` |
 | `/playground` | Playground | Hand-built modal/tabs/disclosure next to shadcn/ui equivalents; keyboard-only e2e |
+| `/stream` | AI chat | Token-by-token streaming chat with Claude via the Vercel AI SDK |
 
 ## Repository layout
 
@@ -45,11 +46,24 @@ components/   Reusable React components (client components only where needed)
 e2e/          Playwright tests (responsive + keyboard-only accessibility)
 playground/   Hand-built ARIA component implementations and notes
 components/ui shadcn/ui registry components (Radix-powered dialog/tabs)
-types/        Shared TypeScript contracts between UI and API
+lib/ai       LLM config module (system prompt + model settings, server-only)
+types/       Shared TypeScript contracts between UI and API
 ```
 
 See [CLAUDE.md](CLAUDE.md) for the full stack and conventions.
 
 ## Project status
 
-> **Week 5 · FE-05 accessible component fundamentals** — hand-built modal, tabs, and disclosure (W3C APG patterns) with keyboard-only Playwright coverage and a playground comparing against shadcn/ui's Radix-powered dialog and tabs.
+## Env vars
+
+See [.env.example](.env.example). `ANTHROPIC_API_KEY` is required for `/stream`
+(the server route handler reads it; it never reaches the browser).
+
+> **Week 4 · FE-06 streaming AI chat** — Claude-powered conversation via the
+> AI SDK (`app/api/chat` + `components/chat.tsx`): token-by-token streaming,
+> Stop mid-stream, localStorage persistence, and bottom-pinned auto-scroll
+> with a jump-to-latest affordance.
+>
+> **Week 5 · FE-05 accessible component fundamentals** — hand-built modal,
+> tabs, and disclosure (W3C APG patterns) with keyboard-only Playwright
+> coverage and a playground comparing against shadcn/ui's Radix dialog/tabs.
