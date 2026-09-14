@@ -36,6 +36,7 @@ Deployed on Vercel from the `main` branch; every push also builds an isolated pr
 | `/health` | Health check | Renders live data fetched from `/api/health` |
 | `/playground` | Playground | Hand-built modal/tabs/disclosure next to shadcn/ui equivalents; keyboard-only e2e |
 | `/stream` | AI chat | Token-by-token streaming chat with Gemini via the Vercel AI SDK, with two server tools rendered as real components |
+| `/microinteractions` | Buttons with a Brain | Stateful button demo (FE-AA1): idle → loading → success/error lifecycle with forced-outcome triggers |
 
 ## Tool contract (`/stream`)
 
@@ -84,6 +85,14 @@ https://aistudio.google.com/apikey — no billing required.
 > deterministic output) renders as a bespoke score card; `clearConversation` is
 > a user-interaction tool with a confirmation card; every tool-part state has a
 > distinct, designed treatment including a failure card.
+>
+> **FE-AA1 Buttons with a Brain** — `components/stateful-button.tsx` choreographs
+> idle → hover/focus → loading → success/error → back to idle with a fixed-width
+> FSM and transform/opacity-only transitions (220ms easeOutQuint entrances,
+> 120ms ease-in exits, 900ms success hold, 400ms error shake). Spam-click safe,
+> keyboard focused with a visible ring, and `prefers-reduced-motion` drops motion
+> but never feedback. Demo page `/microinteractions` ships forced success/error
+> triggers.
 >
 > **FE-08 error, empty & edge states** — mid-stream failure renders a designed
 > error banner with a "Retry last message" that re-runs only the interrupted
