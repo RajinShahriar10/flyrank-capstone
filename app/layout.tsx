@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteNav from "@/components/site-nav";
 import "./globals.css";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "FlyRank Capstone",
@@ -12,7 +16,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn("font-sans", geist.variable)}>
       <body className="flex min-h-screen flex-col bg-paper text-ink antialiased">
         <header className="border-b border-slate-200 bg-white">
           <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:py-4">
