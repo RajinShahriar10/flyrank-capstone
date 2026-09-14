@@ -10,6 +10,7 @@ const chatMock = vi.hoisted(() => ({
   error: undefined as Error | undefined,
   sendMessage: vi.fn<(args: { text: string }) => Promise<void>>(),
   stop: vi.fn<() => Promise<void>>(),
+  regenerate: vi.fn<() => Promise<void>>(),
   clearError: vi.fn(),
   setMessages: vi.fn(),
 }));
@@ -21,6 +22,7 @@ vi.mock("@ai-sdk/react", () => ({
     error: chatMock.error,
     sendMessage: chatMock.sendMessage,
     stop: chatMock.stop,
+    regenerate: chatMock.regenerate,
     clearError: chatMock.clearError,
     setMessages: chatMock.setMessages,
   }),
@@ -120,9 +122,52 @@ describe("Chat", () => {
     chatMock.error = new Error("boom");
     const { user } = setup();
 
+    expect(screen.getByRole("alert")).toHaveTextContent("The last reply was interrupted.");
     expect(screen.getByRole("alert")).toHaveTextContent("boom");
+    // With no prior message there is nothing to retry.
+    expect(screen.queryByRole("button", { name: /retry/i })).not.toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: /dismiss/i }));
     expect(chatMock.clearError).toHaveBeenCalled();
+  });
+
+  it("retries the interrupted reply and guards against a double click", async () => {
+    chatMock.status = "error";
+    chatMock.messages = [uiMessage("user", "hello"), uiMessage("assistant", "partial")];
+    chatMock.error = new Error("stream interrupted");
+    let releaseRegenerate: () => void = () => undefined;
+    chatMock.regenerate.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          releaseRegenerate = resolve;
+        }),
+    );
+    const { user } = setup();
+
+    const retry = screen.getByRole("button", { name: /retry last message/i });
+    expect(retry).toBeEnabled();
+
+    await user.click(retry);
+    expect(chatMock.regenerate).toHaveBeenCalledTimes(1);
+    // The button locks while a retry is in flight so the terminal message is
+    // never resubmitted twice.
+    expect(screen.getByRole("button", { name: /retry last message/i })).toBeDisabled();
+
+    await user.click(screen.getByRole("button", { name: /retry last message/i }));
+    expect(chatMock.regenerate).toHaveBeenCalledTimes(1);
+
+    releaseRegenerate();
+  });
+
+  it("renders clickable suggestions that fill the input on first run", async () => {
+    chatMock.status = "ready";
+    chatMock.messages = [];
+    const { user } = setup();
+
+    await user.click(
+      screen.getByRole("button", { name: /how good is the task manager/i }),
+    );
+    expect(screen.getByLabelText("Message")).toHaveValue("How good is the task manager?");
   });
 
   it("releases the bottom pin when the user scrolls up and jumps back on demand", async () => {

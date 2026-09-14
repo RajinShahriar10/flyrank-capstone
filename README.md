@@ -85,6 +85,14 @@ https://aistudio.google.com/apikey — no billing required.
 > a user-interaction tool with a confirmation card; every tool-part state has a
 > distinct, designed treatment including a failure card.
 >
+> **FE-08 error, empty & edge states** — mid-stream failure renders a designed
+> error banner with a "Retry last message" that re-runs only the interrupted
+> reply (double-click safe) plus Dismiss; route-level error boundaries in
+> `app/error.tsx` / `app/stream/error.tsx`; a layout-matched thinking skeleton;
+> first-run empty state with click-to-fill suggestions; and mobile Safari fixes
+> (`dvh` height, `overscroll-contain`). Automated sabotage covered in
+> `e2e/chat-error.spec.ts`.
+>
 > **Week 5 · FE-05 accessible component fundamentals** — hand-built modal,
 > tabs, and disclosure (W3C APG patterns) with keyboard-only Playwright
 > coverage and a playground comparing against shadcn/ui's Radix dialog/tabs.
