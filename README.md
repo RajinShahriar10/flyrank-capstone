@@ -23,7 +23,7 @@ Open http://localhost:3000.
 
 Deployed on Vercel from the `main` branch; every push also builds an isolated preview URL.
 
-`<!-- TODO: paste your Vercel production URL here -->`
+**Production preview:** https://flyrank-capstone-blue.vercel.app
 
 ## Screens
 
