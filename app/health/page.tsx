@@ -44,12 +44,12 @@ export default async function HealthPage() {
     error = cause instanceof Error ? cause.message : "Unknown health check failure.";
   }
 
-  if (error) {
+  if (error || !health) {
     return (
       <div>
         <h1 className="text-2xl font-semibold">Health check</h1>
         <p className="mt-2 text-red-600" role="alert">
-          {error}
+          {error ?? "Health payload unavailable."}
         </p>
       </div>
     );
