@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
-import { ArrowDownIcon, Loader2Icon, SquareIcon } from "lucide-react";
+import {
+  ArrowDownIcon,
+  RotateCcwIcon,
+  SquareIcon,
+} from "lucide-react";
 import { useChatScroll } from "@/components/chat-scroll";
 import { ToolPanel, asToolInvocation } from "@/components/tool-panel";
 import { shouldAutoContinueAfterTool } from "@/lib/chat-continue";
@@ -15,6 +19,31 @@ import {
 
 const STORAGE_KEY = "craftui:chat:v1";
 
+/** Click-to-fill prompts shown in the first-run empty state. They are
+ *  onboarding, not decoration: each one loads into the input so a first-time
+ *  user can reach a useful response in one click. */
+const SUGGESTIONS = [
+  "How good is the task manager?",
+  "What tech is this built with?",
+  "Clear the conversation",
+] as const;
+
+/** Map raw failure messages to deliberate, actionable copy. Anything unknown
+ *  passes through untouched so the real cause is never hidden. */
+function friendlyError(error: Error): string {
+  const message = error.message || "";
+  if (/429|rate\s*limit/i.test(message)) {
+    return "Rate limit reached. Wait a moment, then try again.";
+  }
+  if (/timed?\s*out|abort|network|fetch|failed to fetch/i.test(message)) {
+    return "The connection dropped. Check your network, then retry.";
+  }
+  if (/503|not configured/i.test(message)) {
+    return "The chat server is not configured yet. Add your Gemini API key to Vercel and redeploy.";
+  }
+  return message || "Something went wrong while streaming your last reply.";
+}
+
 function textOf(message: UIMessage): string {
   return message.parts
     .filter((part) => part.type === "text")
@@ -22,25 +51,26 @@ function textOf(message: UIMessage): string {
     .join("");
 }
 
-function ThinkingIndicator() {
+/** Pending-state skeleton. Sized to roughly match a short assistant bubble so
+ *  the handoff to real content doesn't cause a visible layout shift (CLS). */
+function ThinkingSkeleton() {
   return (
     <div
       role="status"
-      className="flex w-fit items-center gap-2 rounded-xl rounded-bl-sm bg-slate-100 px-4 py-2.5 text-sm text-slate-500"
+      className="w-fit max-w-[85%] self-start animate-in fade-in-0 duration-150 motion-reduce:animate-none rounded-xl rounded-bl-sm bg-slate-100 px-4 py-3"
     >
-      <span aria-hidden="true" className="flex gap-1">
-        <span className="size-1.5 animate-pulse rounded-full bg-slate-400" />
-        <span className="size-1.5 animate-pulse rounded-full bg-slate-400 [animation-delay:150ms]" />
-        <span className="size-1.5 animate-pulse rounded-full bg-slate-400 [animation-delay:300ms]" />
-      </span>
-      Thinking…
+      <span className="sr-only">Thinking…</span>
+      <div className="h-3 w-28 animate-pulse rounded-md bg-slate-200" />
+      <div className="mt-2 h-3 w-44 animate-pulse rounded-md bg-slate-200" />
+      <div className="mt-2 h-3 w-16 animate-pulse rounded-md bg-slate-200" />
     </div>
   );
 }
 
 export default function Chat() {
   const autoContinueAttempts = useRef(0);
-  const { messages, sendMessage, stop, status, error, clearError, setMessages } =
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { messages, sendMessage, stop, regenerate, status, error, clearError, setMessages } =
     useChat({
       // After a finished scoreFeature step the stream ends with no summary yet;
       // resubmit once so the model turns the tool result into prose. Counted
@@ -56,6 +86,7 @@ export default function Chat() {
 
   const [input, setInput] = useState("");
   const [hydrated, setHydrated] = useState(false);
+  const [retrying, setRetrying] = useState(false);
   const {
     viewportRef,
     pinnedToBottom,
@@ -100,6 +131,19 @@ export default function Chat() {
     void sendMessage({ text });
   }
 
+  function applySuggestion(text: string) {
+    setInput(text);
+    inputRef.current?.focus();
+  }
+
+  function handleRetry() {
+    if (retrying) {
+      return;
+    }
+    setRetrying(true);
+    void regenerate().finally(() => setRetrying(false));
+  }
+
   function handleClearConversation() {
     window.localStorage.removeItem(STORAGE_KEY);
     setMessages([]);
@@ -119,20 +163,35 @@ export default function Chat() {
     (lastMessage === undefined || lastMessage.role !== "assistant" || lastAssistantText === "");
 
   return (
-    <div className="mx-auto flex h-[70vh] min-h-[28rem] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
+    // dvh keeps the box inside the dynamic viewport so mobile Safari's toolbar
+    // and the on-screen keyboard never push the composer out of reach.
+    <div className="mx-auto flex h-[min(80dvh,40rem)] min-h-[20rem] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
       <div className="relative min-h-0 flex-1">
         <div
           ref={viewportRef}
           onScroll={handleScroll}
           role="log"
           aria-label="Chat conversation"
-          className="flex h-full flex-col gap-4 overflow-y-auto p-4"
+          className="overscroll-contain flex h-full flex-col gap-4 overflow-y-auto p-4"
         >
           {messages.length === 0 && (
-            <p className="m-auto max-w-xs text-center text-sm text-slate-500">
-              Start a conversation about CraftUI — try “How good is the task
-              manager?” or “What tech is this built with?”
-            </p>
+            <div className="m-auto w-full max-w-xs space-y-3 text-center">
+              <p className="text-sm text-slate-500">
+                Start a conversation about CraftUI. Or jump in with a question:
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {SUGGESTIONS.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => applySuggestion(suggestion)}
+                    className="rounded-full border border-brand-100 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 transition-colors hover:bg-brand-100"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
           {messages.map((message) => {
@@ -170,7 +229,7 @@ export default function Chat() {
             });
           })}
 
-          {showThinking && <ThinkingIndicator />}
+          {showThinking && <ThinkingSkeleton />}
         </div>
 
         {!pinnedToBottom && (
@@ -194,6 +253,7 @@ export default function Chat() {
           Message
         </label>
         <input
+          ref={inputRef}
           id="chat-input"
           type="text"
           value={input}
@@ -225,19 +285,35 @@ export default function Chat() {
       </form>
 
       {status === "error" && error !== undefined && (
-        <p role="alert" className="flex items-center gap-2 border-t border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700">
-          <Loader2Icon className="size-4" aria-hidden="true" />
-          <span className="min-w-0 flex-1">
-            {error.message || "Something went wrong while streaming."}
-          </span>
-          <button
-            type="button"
-            onClick={() => clearError()}
-            className="shrink-0 rounded-md border border-rose-300 px-2 py-1 text-xs font-medium"
-          >
-            Dismiss
-          </button>
-        </p>
+        <div
+          role="alert"
+          className="animate-in fade-in-0 duration-200 motion-reduce:animate-none border-t border-rose-200 bg-rose-50 px-4 py-3"
+        >
+          <p className="text-sm font-semibold text-rose-800">
+            The last reply was interrupted.
+          </p>
+          <p className="mt-0.5 text-xs text-rose-600">{friendlyError(error)}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {messages.length > 0 && (
+              <button
+                type="button"
+                disabled={active || retrying}
+                onClick={handleRetry}
+                className="inline-flex items-center gap-1.5 rounded-md bg-rose-600 px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                <RotateCcwIcon className="size-3.5" aria-hidden="true" />
+                Retry last message
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => clearError()}
+              className="inline-flex items-center rounded-md border border-rose-300 px-3 py-1.5 text-sm font-medium text-rose-700 transition-colors hover:bg-rose-100"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
