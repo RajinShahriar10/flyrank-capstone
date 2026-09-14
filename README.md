@@ -1,4 +1,4 @@
-# FlyRank Capstone
+# CraftUI
 
 A full-stack web application built with [Next.js](https://nextjs.org) (App Router), React, and TypeScript — the capstone project for the Frontend AI Engineering track at FlyRank.
 

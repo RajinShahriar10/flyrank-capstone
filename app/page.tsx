@@ -21,6 +21,11 @@ const screens = [
     title: "Health check",
     description: "Live service status rendered from the API.",
   },
+  {
+    href: "/playground",
+    title: "A11y playground",
+    description: "Hand-built modal, tabs and disclosure vs shadcn/ui.",
+  },
 ];
 
 export default function Home() {
@@ -28,7 +33,7 @@ export default function Home() {
     <div className="space-y-8">
       <section className="space-y-3">
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          FlyRank Capstone
+          CraftUI
         </h1>
         <p className="max-w-2xl text-slate-600">
           A full-stack Next.js application — React, TypeScript and Tailwind,

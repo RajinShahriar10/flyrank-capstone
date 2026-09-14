@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "FlyRank Capstone",
-  description: "Full-stack capstone application for the Frontend AI Engineering track.",
+  title: "CraftUI",
+  description: "Frontend AI showcase — forms, task state, and accessible components.",
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
                 aria-hidden="true"
                 className="inline-flex size-2.5 rounded-full bg-brand-500"
               />
-              FlyRank Capstone
+              CraftUI
             </Link>
             <SiteNav />
           </div>
@@ -38,7 +38,7 @@ export default function RootLayout({
         </main>
         <footer className="border-t border-slate-200 bg-white">
           <p className="mx-auto w-full max-w-5xl px-4 py-4 text-center text-xs text-slate-500">
-            FlyRank Capstone · Frontend AI Engineering track
+            CraftUI · Frontend AI Engineering track
           </p>
         </footer>
       </body>
