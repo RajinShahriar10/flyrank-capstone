@@ -26,6 +26,11 @@ const screens = [
     title: "A11y playground",
     description: "Hand-built modal, tabs and disclosure vs shadcn/ui.",
   },
+  {
+    href: "/stream",
+    title: "AI chat",
+    description: "Token-by-token streaming conversation with Claude.",
+  },
 ];
 
 export default function Home() {
