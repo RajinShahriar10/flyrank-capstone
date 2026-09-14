@@ -29,6 +29,9 @@ Capstone project for the Frontend AI Engineering track. A full-stack Next.js app
 - **Components:** co-locate under `components/`; one component per file; default exports for pages, named exports for components.
 - **Types:** shared types in `types/`; reuse a single contract between frontend and API route handlers.
 - **Styling:** Tailwind utilities only; no inline styles.
+- **Design tokens:** Tailwind v4 CSS-first tokens in `app/globals.css` (`--color-brand-*`, `--color-ink`, `--color-paper`) — reference tokens, never raw hex values.
+- **Server/client split (FE-04):** Server Components by default. A component becomes `"use client"` only for interactivity — forms (RHF), `usePathname` (nav), list state. Route map lives in `README.md`; `app/api/health` is the reference API handler.
+- **E2E:** Playwright in `e2e/` — screens load without horizontal overflow at 375px and 1280px; run `npm run e2e`.
 - **Accessibility:** semantic HTML, alt text, and keyboard navigation.
 - **Verification:** run `npm run lint` and `npm run build` before declaring a change complete.
 

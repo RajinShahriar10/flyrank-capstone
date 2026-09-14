@@ -19,12 +19,29 @@ npm run dev
 
 Open http://localhost:3000.
 
+## Live preview
+
+Deployed on Vercel from the `main` branch; every push also builds an isolated preview URL.
+
+`<!-- TODO: paste your Vercel production URL here -->`
+
+## Screens
+
+| Route | Screen | Notes |
+| --- | --- | --- |
+| `/` | Home | Landing with links to every screen |
+| `/tasks` | Task manager | Add/toggle/delete tasks, filters, localStorage persistence |
+| `/settings` | Settings | Profile form with zod validation |
+| `/profile` | Profile | Placeholder |
+| `/health` | Health check | Renders live data fetched from `/api/health` |
+
 ## Repository layout
 
 ```
 app/          Next.js App Router pages and routes
 app/api/      API Route Handlers (Vercel serverless functions)
-components/   Reusable React components
+components/   Reusable React components (client components only where needed)
+e2e/          Playwright smoke tests (responsive at 375px and 1280px)
 types/        Shared TypeScript contracts between UI and API
 ```
 
@@ -32,4 +49,4 @@ See [CLAUDE.md](CLAUDE.md) for the full stack and conventions.
 
 ## Project status
 
-> **Week 1 · Setup** — repository scaffolding only. Application code lands in later weeks.
+> **Week 3 · Skeleton deployed** — routed screens, design tokens, health check, and git-connected Vercel previews.
