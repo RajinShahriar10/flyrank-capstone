@@ -11,6 +11,7 @@ import {
   CHAT_SYSTEM_PROMPT,
   CHAT_TEMPERATURE,
 } from "@/lib/ai/chat";
+import { chatTools } from "@/lib/ai/tools";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -42,12 +43,14 @@ export async function POST(request: Request) {
     messages,
     temperature: CHAT_TEMPERATURE,
     maxOutputTokens: CHAT_MAX_TOKENS,
+    tools: chatTools,
   });
 
   // Convert the model text stream into a UI message stream the client's
   // useChat understands, without leaking server-side error details.
   const uiStream = toUIMessageStream({
     stream: result.stream,
+    tools: chatTools,
     onError: () => "The stream ended with an unexpected error.",
   });
 

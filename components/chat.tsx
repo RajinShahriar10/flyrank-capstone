@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { ArrowDownIcon, Loader2Icon, SquareIcon } from "lucide-react";
 import { useChatScroll } from "@/components/chat-scroll";
+import { ToolPanel, asToolInvocation } from "@/components/tool-panel";
 import {
   parseStoredMessages,
   serializeStoredMessages,
@@ -85,11 +86,22 @@ export default function Chat() {
     void sendMessage({ text });
   }
 
+  function handleClearConversation() {
+    window.localStorage.removeItem(STORAGE_KEY);
+    setMessages([]);
+  }
+
   const lastMessage = messages.length > 0 ? messages[messages.length - 1] : undefined;
   const lastAssistantText =
     lastMessage && lastMessage.role === "assistant" ? textOf(lastMessage) : "";
+  const lastMessageIsMostlyTool =
+    lastMessage !== undefined &&
+    lastMessage.role === "assistant" &&
+    lastMessage.parts.length > 0 &&
+    lastMessage.parts.every((part) => part.type !== "text");
   const showThinking =
     active &&
+    !lastMessageIsMostlyTool &&
     (lastMessage === undefined || lastMessage.role !== "assistant" || lastAssistantText === "");
 
   return (
@@ -104,29 +116,44 @@ export default function Chat() {
         >
           {messages.length === 0 && (
             <p className="m-auto max-w-xs text-center text-sm text-slate-500">
-              Start a conversation about CraftUI — try “What tech is this built
-              with?”
+              Start a conversation about CraftUI — try “How good is the task
+              manager?” or “What tech is this built with?”
             </p>
           )}
 
           {messages.map((message) => {
             const isAssistant = message.role === "assistant";
-            const text = textOf(message);
-            if (isAssistant && text === "") {
+            return message.parts.map((part, index) => {
+              if (part.type === "text") {
+                const text = part.text;
+                if (isAssistant && text === "") {
+                  return null;
+                }
+                return (
+                  <div
+                    key={`${message.id}-${index}`}
+                    className={`max-w-[85%] whitespace-pre-wrap break-words rounded-xl px-4 py-2.5 text-sm ${
+                      isAssistant
+                        ? "self-start rounded-bl-sm bg-slate-100 text-slate-800"
+                        : "self-end rounded-br-sm bg-brand-600 text-white"
+                    }`}
+                  >
+                    {text}
+                  </div>
+                );
+              }
+              const tool = asToolInvocation(part);
+              if (tool) {
+                return (
+                  <ToolPanel
+                    key={tool.toolCallId}
+                    invocation={tool}
+                    onClearConversation={handleClearConversation}
+                  />
+                );
+              }
               return null;
-            }
-            return (
-              <div
-                key={message.id}
-                className={`max-w-[85%] whitespace-pre-wrap break-words rounded-xl px-4 py-2.5 text-sm ${
-                  isAssistant
-                    ? "self-start rounded-bl-sm bg-slate-100 text-slate-800"
-                    : "self-end rounded-br-sm bg-brand-600 text-white"
-                }`}
-              >
-                {text}
-              </div>
-            );
+            });
           })}
 
           {showThinking && <ThinkingIndicator />}
