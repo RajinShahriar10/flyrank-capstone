@@ -1,80 +1,75 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import TaskForm from "@/components/task-form";
+import TaskList from "@/components/task-list";
+import type { NewTaskValues, Task, TaskFilter } from "@/types/task";
 
-interface Task {
-  id: number;
-  title: string;
-  done: boolean;
-}
+const STORAGE_KEY = "flyrank.tasks.v1";
 
 export default function TasksPage() {
-  const [title, setTitle] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [filter, setFilter] = useState<TaskFilter>("all");
+  const [hydrated, setHydrated] = useState(false);
 
-  function addTask(event: React.FormEvent) {
-    event.preventDefault();
-    if (!title.trim()) {
-      return;
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        setTasks(JSON.parse(raw) as Task[]);
+      }
+    } catch {
+      // Corrupt storage: start with an empty list.
     }
-    setTasks([{ id: Date.now(), title: title.trim(), done: false }, ...tasks]);
-    setTitle("");
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (hydrated) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    }
+  }, [hydrated, tasks]);
+
+  function addTask(values: NewTaskValues) {
+    const task: Task = {
+      id: crypto.randomUUID(),
+      title: values.title,
+      deadline: values.deadline || undefined,
+      completed: false,
+      createdAt: new Date().toISOString(),
+    };
+    setTasks((previous) => [task, ...previous]);
   }
 
-  function toggle(id: number) {
-    setTasks(tasks.map((task) => (task.id === id ? { ...task, done: !task.done } : task)));
+  function toggleTask(id: string) {
+    setTasks((previous) =>
+      previous.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task,
+      ),
+    );
   }
 
-  function remove(id: number) {
-    setTasks(tasks.filter((task) => task.id !== id));
+  function deleteTask(id: string) {
+    setTasks((previous) => previous.filter((task) => task.id !== id));
   }
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-2xl font-semibold">Task manager</h1>
-      <p className="mt-2 text-slate-600">Add, complete, and clear your tasks.</p>
+      <p className="mt-2 text-slate-600">
+        Add, complete, and clear your tasks. Saved in your browser.
+      </p>
 
-      <form onSubmit={addTask} className="mt-6 flex gap-2">
-        <input
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          placeholder="Add a task"
-          className="block w-full rounded-md border border-slate-300 px-3 py-2"
+      <div className="mt-6 space-y-8">
+        <TaskForm onAdd={addTask} />
+        <TaskList
+          tasks={tasks}
+          filter={filter}
+          onFilterChange={setFilter}
+          onToggle={toggleTask}
+          onDelete={deleteTask}
         />
-        <button
-          type="submit"
-          className="shrink-0 rounded-md bg-slate-900 px-4 py-2 text-white"
-        >
-          Add
-        </button>
-      </form>
-
-      <ul className="mt-6 space-y-2">
-        {tasks.map((task, index) => (
-          <li
-            key={index}
-            className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-white px-3 py-2"
-          >
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={task.done}
-                onChange={() => toggle(task.id)}
-              />
-              <span className={task.done ? "text-slate-400 line-through" : undefined}>
-                {task.title}
-              </span>
-            </label>
-            <button
-              type="button"
-              onClick={() => remove(task.id)}
-              className="text-sm text-red-600"
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+      </div>
     </main>
   );
 }
