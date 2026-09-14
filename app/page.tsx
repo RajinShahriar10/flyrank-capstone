@@ -29,7 +29,7 @@ const screens = [
   {
     href: "/stream",
     title: "AI chat",
-    description: "Token-by-token streaming conversation with Claude.",
+    description: "Token-by-token streaming conversation with Gemini.",
   },
 ];
 
