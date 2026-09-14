@@ -9,7 +9,7 @@
 /** Which Google AI model to use. Overridable via `GEMINI_MODEL` so the
  *  deployed value can be bumped without a code change (kept in sync in
  *  `.env.example`). */
-export const CHAT_MODEL: string = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+export const CHAT_MODEL: string = process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
 
 /** Sampling temperature: 0 = deterministic, 1 = creative. */
 export const CHAT_TEMPERATURE = 0.7;
