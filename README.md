@@ -23,7 +23,7 @@ Open http://localhost:3000.
 
 Deployed on Vercel from the `main` branch; every push also builds an isolated preview URL.
 
-**Production preview:** https://flyrank-capstone-blue.vercel.app
+**Production preview:** https://craftui-capstone.vercel.app
 
 ## Screens
 
@@ -35,7 +35,22 @@ Deployed on Vercel from the `main` branch; every push also builds an isolated pr
 | `/profile` | Profile | Placeholder |
 | `/health` | Health check | Renders live data fetched from `/api/health` |
 | `/playground` | Playground | Hand-built modal/tabs/disclosure next to shadcn/ui equivalents; keyboard-only e2e |
-| `/stream` | AI chat | Token-by-token streaming chat with Claude via the Vercel AI SDK |
+| `/stream` | AI chat | Token-by-token streaming chat with Claude via the Vercel AI SDK, with two server tools rendered as real components |
+
+## Tool contract (`/stream`)
+
+The chat model has access to two tools (full Zod schemas in `lib/ai/tool-schemas.ts`,
+definitions in `lib/ai/tools.ts`). Schemas are shared between the server route and the
+client tool-result components, so a rendered shape is always validated against the
+server's declared contract.
+
+| Tool | Purpose | Input | Output |
+| --- | --- | --- | --- |
+| `scoreFeature` | Evaluates a real CraftUI feature | `feature` (`'task-manager'` \| `'settings-form'` \| `'health-check'` \| `'a11y-playground'` \| `'streaming-chat'`), optional `flaky` (`boolean`, simulates a failure to show the designed error state) | `{ feature, score (0–100), verdict ('excellent'\|'good'\|'needs-work'), summary, strengths[], gaps[] }` — rendered as the **ScoreCard** component |
+| `clearConversation` | Requests confirmation before clearing chat history | `reason` (string, 1–140 chars) | `{ status: 'needs_confirmation', message, remainingMessages }` — rendered as a **confirm/cancel card**; clearing happens client-side only |
+
+Tool parts render as distinct cards for each AI SDK state: *input-streaming*, *input-available*,
+*output-available*, and *output-error*.
 
 ## Repository layout
 
@@ -46,7 +61,7 @@ components/   Reusable React components (client components only where needed)
 e2e/          Playwright tests (responsive + keyboard-only accessibility)
 playground/   Hand-built ARIA component implementations and notes
 components/ui shadcn/ui registry components (Radix-powered dialog/tabs)
-lib/ai       LLM config module (system prompt + model settings, server-only)
+lib/ai       LLM config, tool definitions, and shared tool schemas (server + client)
 types/       Shared TypeScript contracts between UI and API
 ```
 
@@ -59,10 +74,15 @@ See [CLAUDE.md](CLAUDE.md) for the full stack and conventions.
 See [.env.example](.env.example). `ANTHROPIC_API_KEY` is required for `/stream`
 (the server route handler reads it; it never reaches the browser).
 
-> **Week 4 · FE-06 streaming AI chat** — Claude-powered conversation via the
+> **Week 6 · FE-06 streaming AI chat** — Claude-powered conversation via the
 > AI SDK (`app/api/chat` + `components/chat.tsx`): token-by-token streaming,
 > Stop mid-stream, localStorage persistence, and bottom-pinned auto-scroll
 > with a jump-to-latest affordance.
+>
+> **FE-07 tool results & structured output** — `scoreFeature` (typed Zod input,
+> deterministic output) renders as a bespoke score card; `clearConversation` is
+> a user-interaction tool with a confirmation card; every tool-part state has a
+> distinct, designed treatment including a failure card.
 >
 > **Week 5 · FE-05 accessible component fundamentals** — hand-built modal,
 > tabs, and disclosure (W3C APG patterns) with keyboard-only Playwright
