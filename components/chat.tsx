@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { ArrowDownIcon, Loader2Icon, SquareIcon } from "lucide-react";
 import { useChatScroll } from "@/components/chat-scroll";
 import { ToolPanel, asToolInvocation } from "@/components/tool-panel";
+import { shouldAutoContinueAfterTool } from "@/lib/chat-continue";
 import {
   parseStoredMessages,
   serializeStoredMessages,
@@ -38,8 +39,20 @@ function ThinkingIndicator() {
 }
 
 export default function Chat() {
+  const autoContinueAttempts = useRef(0);
   const { messages, sendMessage, stop, status, error, clearError, setMessages } =
-    useChat();
+    useChat({
+      // After a finished scoreFeature step the stream ends with no summary yet;
+      // resubmit once so the model turns the tool result into prose. Counted
+      // and reset per user turn to cap runaway tool loops.
+      sendAutomaticallyWhen: ({ messages: current }) => {
+        if (!shouldAutoContinueAfterTool(current, autoContinueAttempts.current)) {
+          return false;
+        }
+        autoContinueAttempts.current += 1;
+        return true;
+      },
+    });
 
   const [input, setInput] = useState("");
   const [hydrated, setHydrated] = useState(false);
@@ -81,6 +94,7 @@ export default function Chat() {
     if (!canSend) {
       return;
     }
+    autoContinueAttempts.current = 0;
     const text = input.trim();
     setInput("");
     void sendMessage({ text });
