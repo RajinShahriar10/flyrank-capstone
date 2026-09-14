@@ -6,10 +6,10 @@
  * Nothing in this module is ever sent to the browser.
  */
 
-/** Which Anthropic model to use. Overridable via `ANTHROPIC_MODEL` so the
+/** Which Google AI model to use. Overridable via `GEMINI_MODEL` so the
  *  deployed value can be bumped without a code change (kept in sync in
  *  `.env.example`). */
-export const CHAT_MODEL: string = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514";
+export const CHAT_MODEL: string = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
 /** Sampling temperature: 0 = deterministic, 1 = creative. */
 export const CHAT_TEMPERATURE = 0.7;

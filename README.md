@@ -35,7 +35,7 @@ Deployed on Vercel from the `main` branch; every push also builds an isolated pr
 | `/profile` | Profile | Placeholder |
 | `/health` | Health check | Renders live data fetched from `/api/health` |
 | `/playground` | Playground | Hand-built modal/tabs/disclosure next to shadcn/ui equivalents; keyboard-only e2e |
-| `/stream` | AI chat | Token-by-token streaming chat with Claude via the Vercel AI SDK, with two server tools rendered as real components |
+| `/stream` | AI chat | Token-by-token streaming chat with Gemini via the Vercel AI SDK, with two server tools rendered as real components |
 
 ## Tool contract (`/stream`)
 
@@ -71,10 +71,11 @@ See [CLAUDE.md](CLAUDE.md) for the full stack and conventions.
 
 ## Env vars
 
-See [.env.example](.env.example). `ANTHROPIC_API_KEY` is required for `/stream`
-(the server route handler reads it; it never reaches the browser).
+See [.env.example](.env.example). `GOOGLE_GENERATIVE_AI_API_KEY` is required for `/stream`
+(the server route handler reads it; it never reaches the browser). Get a free key at
+https://aistudio.google.com/apikey — no billing required.
 
-> **Week 6 · FE-06 streaming AI chat** — Claude-powered conversation via the
+> **Week 6 · FE-06 streaming AI chat** — Gemini-powered conversation via the
 > AI SDK (`app/api/chat` + `components/chat.tsx`): token-by-token streaming,
 > Stop mid-stream, localStorage persistence, and bottom-pinned auto-scroll
 > with a jump-to-latest affordance.

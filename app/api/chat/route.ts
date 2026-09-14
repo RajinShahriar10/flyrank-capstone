@@ -4,7 +4,7 @@ import {
   streamText,
   toUIMessageStream,
 } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { google } from "@ai-sdk/google";
 import {
   CHAT_MAX_TOKENS,
   CHAT_MODEL,
@@ -27,9 +27,9 @@ function readMessages(body: unknown): IncomingMessages {
 }
 
 export async function POST(request: Request) {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     return Response.json(
-      { error: "Server: ANTHROPIC_API_KEY is not configured." },
+      { error: "Server: GOOGLE_GENERATIVE_AI_API_KEY is not configured." },
       { status: 503 },
     );
   }
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
   const messages = await convertToModelMessages(readMessages(body));
 
   const result = streamText({
-    model: anthropic(CHAT_MODEL),
+    model: google(CHAT_MODEL),
     system: CHAT_SYSTEM_PROMPT,
     messages,
     temperature: CHAT_TEMPERATURE,
