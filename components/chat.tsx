@@ -120,7 +120,7 @@ export default function Chat() {
 
   return (
     <div className="mx-auto flex h-[70vh] min-h-[28rem] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div className="relative flex-1">
+      <div className="relative min-h-0 flex-1">
         <div
           ref={viewportRef}
           onScroll={handleScroll}
