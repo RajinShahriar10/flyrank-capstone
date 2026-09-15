@@ -14,5 +14,18 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     exclude: ["e2e/**", "node_modules/**"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      include: ["components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"],
+      exclude: [
+        "**/__tests__/**",
+        "**/types/**",
+        "components/ui/**",
+        "components/three/**",
+        "playground/**",
+        "**/*.d.ts",
+      ],
+    },
   },
 });

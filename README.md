@@ -9,6 +9,9 @@ shipped through human-AI collaboration.
 
 **Production:** https://craftui-capstone.vercel.app
 
+**Capstone portfolio entry** (brief, AI integration, audit, deployment checklist,
+reflection): [docs/CAPSTONE.md](docs/CAPSTONE.md).
+
 | Home | Streaming AI chat |
 | --- | --- |
 | ![Home](docs/screenshots/home.png) | ![Chat](docs/screenshots/stream.png) |
@@ -56,6 +59,7 @@ state with a notice. The key never leaves the server.
 | `npm run build` | Production build (`next build`) |
 | `npm run lint` | ESLint (`next/core-web-vitals`) |
 | `npm run test` | Unit tests (Vitest + RTL) |
+| `npm run test:coverage` | Unit tests with a coverage report (`coverage/index.html`) |
 | `npm run e2e` | Playwright E2E — 4 projects (Chromium, Firefox, WebKit desktop, WebKit mobile) |
 
 ## Environment variables
@@ -172,6 +176,15 @@ Key suites:
   `e2e/chat.spec.ts` (primary flow) cover the chat end-to-end.
 - `e2e/skeleton.spec.ts` — every screen loads without horizontal overflow
   at 375px and 1280px, across all four browser projects.
+
+## Known limitations
+
+A consolidated list of limitations and future work lives in the [capstone
+submission](docs/CAPSTONE.md#4-known-limitations--future-improvements); the
+short version: chat history is browser-local, the rate limiter is per-instance
+in-memory (documented trade-off), the 3D studio uses procedural meshes only,
+and two WebGL-heavy components rely on Playwright coverage rather than jsdom
+units.
 
 ## Shipping flow
 
