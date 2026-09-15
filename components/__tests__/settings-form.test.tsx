@@ -1,6 +1,6 @@
 "use client";
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import SettingsForm from "@/components/settings-form";
@@ -91,7 +91,9 @@ describe("SettingsForm", () => {
     await screen.findByText("Profile saved.");
 
     await user.type(screen.getByLabelText("Full name"), "x");
-    expect(screen.queryByText("Profile saved.")).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByText("Profile saved.")).not.toBeInTheDocument(),
+    );
   });
 });
 
