@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/health", label: "Health" },
   { href: "/stream", label: "Chat" },
   { href: "/playground", label: "Playground" },
+  { href: "/3d", label: "3D" },
 ];
 
 export default function SiteNav() {

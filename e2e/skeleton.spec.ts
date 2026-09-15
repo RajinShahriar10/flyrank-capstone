@@ -9,6 +9,7 @@ const ROUTES = [
   "/playground",
   "/stream",
   "/microinteractions",
+  "/3d",
 ];
 
 const VIEWPORTS = [

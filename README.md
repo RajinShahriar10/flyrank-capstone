@@ -37,6 +37,7 @@ Deployed on Vercel from the `main` branch; every push also builds an isolated pr
 | `/playground` | Playground | Hand-built modal/tabs/disclosure next to shadcn/ui equivalents; keyboard-only e2e |
 | `/stream` | AI chat | Token-by-token streaming chat with Gemini via the Vercel AI SDK, with two server tools rendered as real components |
 | `/microinteractions` | Buttons with a Brain | Stateful button demo (FE-AA1): idle → loading → success/error lifecycle with forced-outcome triggers |
+| `/3d` | 3D product studio | React Three Fiber product stage (FE-AA2): orbit/zoom, tap-to-select parts, material configurator; lazy-loaded with reduced-motion fallback |
 
 ## Tool contract (`/stream`)
 
@@ -103,6 +104,19 @@ https://aistudio.google.com/apikey — no billing required.
 > deterministic output) renders as a bespoke score card; `clearConversation` is
 > a user-interaction tool with a confirmation card; every tool-part state has a
 > distinct, designed treatment including a failure card.
+>
+> **FE-AA2 First 3D experience** — `/3d` renders a staged product scene in
+> React Three Fiber: orbit/zoom, tap-to-select any of four parts, and a
+> configurator that restyles the material (color, metalness, roughness,
+> wireframe) plus auto-rotate speed. **Perf note:** the scene is entirely
+> procedural primitives — no external GLB/DRACO bytes — and the whole Three.js
+> stack is dynamic-imported only after clicking "Launch 3D studio", so the page
+> shell never pays for it. The canvas caps pixel ratio at 2 and keeps the scene
+> to a handful of meshes, one shadow-casting light and a cursor light. It also
+> respects `prefers-reduced-motion` and a WebGL support check with a static
+> fallback card. **With more time:** load a real DRACO-compressed GLB with a
+> drag-and-drop viewer, add env-mapped reflections via drei `<Environment>`, and
+> report live FPS in the corner (FE-10 lens).
 >
 > **FE-AA1 Buttons with a Brain** — `components/stateful-button.tsx` choreographs
 > idle → hover/focus → loading → success/error → back to idle with a fixed-width
