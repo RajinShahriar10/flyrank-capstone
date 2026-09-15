@@ -41,7 +41,17 @@ test("mid-stream failure shows a designed error and the retry recovers it", asyn
   await page.goto("/stream");
 
   const input = page.getByLabel("Message");
-  await input.fill("Say hello");
+  // Hydration race: filling a controlled input before React hydrates gets
+  // wiped, leaving the send button disabled. Re-fill until the button sticks.
+  await expect
+    .poll(
+      async () => {
+        await input.fill("Say hello");
+        return page.getByRole("button", { name: /send/i }).isEnabled();
+      },
+      { timeout: 10_000 },
+    )
+    .toBe(true);
   await page.getByRole("button", { name: /send/i }).click();
 
   // Designed error state, with retry asking to re-run the failed reply.

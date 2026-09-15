@@ -1,29 +1,73 @@
 # CraftUI
 
-A full-stack web application built with [Next.js](https://nextjs.org) (App Router), React, and TypeScript — the capstone project for the Frontend AI Engineering track at FlyRank.
+A full-stack web application that ships a real UI product rather than a
+toy: AI chat with streaming and tools, accessible component fundamentals,
+3D, custom shaders, and hardened production APIs — built entirely on
+Vercel. It is the capstone project for the **Frontend AI Engineering
+track** at FlyRank, and every feature was planned, built, tested, and
+shipped through human-AI collaboration.
+
+**Production:** https://craftui-capstone.vercel.app
+
+| Home | Streaming AI chat |
+| --- | --- |
+| ![Home](docs/screenshots/home.png) | ![Chat](docs/screenshots/stream.png) |
+
+| Signature shader hero | 3D product studio |
+| --- | --- |
+| ![Hero](docs/screenshots/hero.jpg) | ![3D](docs/screenshots/three-d.png) |
+
+| Playground | Task manager |
+| --- | --- |
+| ![Playground](docs/screenshots/playground.png) | ![Tasks](docs/screenshots/tasks.png) |
 
 ## Stack
 
-- **Framework:** Next.js (App Router)
-- **UI:** React + TypeScript
-- **Styling:** Tailwind CSS
-- **Backend:** Next.js API Route Handlers (`app/api/*`)
-- **Hosting:** Vercel (single project serves frontend + serverless API)
+- **Framework:** Next.js 15 (App Router)
+- **Language:** TypeScript (strict, no `any`)
+- **UI:** React with Tailwind CSS v4 (token-driven styling)
+- **Backend:** Next.js Route Handlers in `app/api/*` — deployed as Vercel
+  serverless functions from the same project as the frontend
+- **AI:** Google Gemini via the Vercel AI SDK (`ai`, `@ai-sdk/google`)
+- **3D/shaders:** React Three Fiber, Three.js, raw GLSL fragment shaders
+- **Testing:** Vitest + React Testing Library (unit), Playwright (E2E)
+- **Hosting:** Vercel — one project serves the frontend and the API
 
-## Getting started
+## Running locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000. No build step or separate server is needed —
+the API routes run in-process during development and become serverless
+functions in production.
 
-## Live preview
+Optional: create a `.env` file from `.env.example` and add a Gemini API
+key to turn on the chat screen, otherwise `/stream` renders its empty
+state with a notice. The key never leaves the server.
 
-Deployed on Vercel from the `main` branch; every push also builds an isolated preview URL.
+## Scripts
 
-**Production preview:** https://craftui-capstone.vercel.app
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the dev server on http://localhost:3000 |
+| `npm run build` | Production build (`next build`) |
+| `npm run lint` | ESLint (`next/core-web-vitals`) |
+| `npm run test` | Unit tests (Vitest + RTL) |
+| `npm run e2e` | Playwright E2E — 4 projects (Chromium, Firefox, WebKit desktop, WebKit mobile) |
+
+## Environment variables
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | for `/stream` | Gemini API key, read server-side only. Get a free key at https://aistudio.google.com/apikey |
+| `NEXT_PUBLIC_APP_URL` | optional | Public origin; used by `/health` to reach the API. Falls back to request headers locally |
+| `GEMINI_MODEL` | optional | Override the model (default `gemini-3.6-flash`) |
+
+Same values are configured in Vercel's Production/Preview env vars. See
+[.env.example](.env.example).
 
 ## Screens
 
@@ -31,121 +75,163 @@ Deployed on Vercel from the `main` branch; every push also builds an isolated pr
 | --- | --- | --- |
 | `/` | Home | Landing with links to every screen |
 | `/tasks` | Task manager | Add/toggle/delete tasks, filters, localStorage persistence |
-| `/settings` | Settings | Profile form with zod validation |
+| `/settings` | Settings | Profile form, `react-hook-form` + zod with `noValidate` |
 | `/profile` | Profile | Placeholder |
-| `/health` | Health check | Renders live data fetched from `/api/health` |
-| `/playground` | Playground | Hand-built modal/tabs/disclosure next to shadcn/ui equivalents; keyboard-only e2e |
-| `/stream` | AI chat | Token-by-token streaming chat with Gemini via the Vercel AI SDK, with two server tools rendered as real components |
-| `/microinteractions` | Buttons with a Brain | Stateful button demo (FE-AA1): idle → loading → success/error lifecycle with forced-outcome triggers |
-| `/3d` | 3D product studio | React Three Fiber product stage (FE-AA2): orbit/zoom, tap-to-select parts, material configurator; lazy-loaded with reduced-motion fallback |
-| `/hero` | Signature hero | Fullscreen aurora fragment shader (FE-AA3) with headline overlay; `u_time`/`u_resolution`/`u_mouse`, DPR capped, pauses when hidden, `prefers-reduced-motion` falls back to a static gradient |
+| `/health` | Health check | Fetches live data from `/api/health` |
+| `/playground` | Playground | Hand-built modal/tabs/disclosure beside shadcn/ui equivalents; keyboard-only E2E |
+| `/stream` | AI chat | Token-by-token streaming chat with Gemini, two tools rendered as real components, designed error + retry states |
+| `/microinteractions` | Buttons with a Brain | `StatefulButton` lifecycle (FE-AA1) with forced-success/error triggers |
+| `/3d` | 3D product studio | React Three Fiber stage (FE-AA2): orbit/zoom, select parts, material configurator; lazy-loaded with reduced-motion fallback |
+| `/hero` | Signature hero | Fullscreen aurora fragment shader (FE-AA3) with headline overlay; DPR-capped, pauses when hidden, static-gradient fallback |
 
 ## Tool contract (`/stream`)
 
-The chat model has access to two tools (full Zod schemas in `lib/ai/tool-schemas.ts`,
-definitions in `lib/ai/tools.ts`). Schemas are shared between the server route and the
-client tool-result components, so a rendered shape is always validated against the
-server's declared contract.
+The chat model exposes two tools (Zod schemas in `lib/ai/tool-schemas.ts`,
+definitions in `lib/ai/tools.ts`). Schemas are shared between the server
+route and the client tool-result components, so a rendered shape is always
+validated against the server's declared contract.
 
-| Tool | Purpose | Input | Output |
-| --- | --- | --- | --- |
-| `scoreFeature` | Evaluates a real CraftUI feature | `feature` (`'task-manager'` \| `'settings-form'` \| `'health-check'` \| `'a11y-playground'` \| `'streaming-chat'`), optional `flaky` (`boolean`, simulates a failure to show the designed error state) | `{ feature, score (0–100), verdict ('excellent'\|'good'\|'needs-work'), summary, strengths[], gaps[] }` — rendered as the **ScoreCard** component |
-| `clearConversation` | Requests confirmation before clearing chat history | `reason` (string, 1–140 chars) | `{ status: 'needs_confirmation', message, remainingMessages }` — rendered as a **confirm/cancel card**; clearing happens client-side only |
+| Tool | Purpose | Output rendered as |
+| --- | --- | --- |
+| `scoreFeature` | Evaluates a real CraftUI feature | **ScoreCard** (`{ feature, score, verdict, summary, strengths[], gaps[] }`) |
+| `clearConversation` | Asks for confirmation before clearing history | **confirm/cancel card**; clearing is client-side only |
 
-Tool parts render as distinct cards for each AI SDK state: *input-streaming*, *input-available*,
-*output-available*, and *output-error*.
+Tool parts render a distinct card per AI SDK state: *input-streaming*,
+*input-available*, *output-available*, and *output-error*.
 
-## Testing (FE-09)
-
-Tests are the contract for verified AI-assisted changes. Every component is
-queried the way a user queries the page (role/label, never test IDs), the AI
-route is always mocked at the transport boundary (`@ai-sdk/react` in Vitest,
-`page.route` in Playwright) so the real Gemini API is never called, and
-`npm run lint`, `npm run build`, `npm run test` and `npm run e2e` all run in
-CI on push and block the merge.
-
-- `components/__tests__/chat.test.tsx` — the highest-risk UI: empty, pending,
-  streaming, stop, error and retry states.
-- `components/__tests__/settings-form.test.tsx`, `task-form.test.tsx` — validated
-  forms (zod, `noValidate`, a11y attributes).
-- `components/__tests__/tool-panel.test.tsx` — tool-result component across every
-  tool-part state.
-- `e2e/chat-error.spec.ts` (mock-served failure → retry) and `e2e/chat.spec.ts`
-  (primary chat flow) cover the primary flow end-to-end.
-
-## Repository layout
+## Architecture
 
 ```
-app/          Next.js App Router pages and routes
-app/api/      API Route Handlers (Vercel serverless functions)
-components/   Reusable React components (client components only where needed)
-e2e/          Playwright tests (responsive + keyboard-only accessibility)
-playground/   Hand-built ARIA component implementations and notes
-components/ui shadcn/ui registry components (Radix-powered dialog/tabs)
-lib/ai       LLM config, tool definitions, and shared tool schemas (server + client)
-types/       Shared TypeScript contracts between UI and API
+app/           App Router pages and routes
+app/api/       Route Handlers → Vercel serverless functions
+  health/      Health check (deployment/liveness)
+  chat/        Streaming Gemini chat — rate-limited, input-capped, tools
+components/    React components (Server by default, "use client" only for interactivity)
+playground/    Hand-built ARIA component implementations and notes
+components/ui  shadcn/ui registry components (Radix-powered dialog/tabs)
+lib/ai         LLM config, tool definitions and shared schemas
+lib/security   Rate limiter + input caps guarding the chat route
+lib/util       Cross-cutting helpers (device detection, etc.)
+types/         Shared TypeScript contracts between UI and API
+e2e/           Playwright specs (responsive + keyboard-only accessibility)
+docs/          Screenshots used by this README
 ```
 
-See [CLAUDE.md](CLAUDE.md) for the full stack and conventions.
+Two decisions that shape the layout:
+
+- **Server Components by default (FE-04).** A component opts into
+  `"use client"` only for real interactivity — forms, navigation state,
+  chat streaming. The route map in this README and `app/api/health` are the
+  reference implementations.
+- **Design tokens, not hex values.** Colors are Tailwind v4 CSS-first
+  tokens in `app/globals.css` (`--color-brand-*`, `--color-ink`,
+  `--color-paper`). Components reference tokens so a theme change is one
+  file.
+
+### Security of `/api/chat`
+
+The Gemini route is the only one that spends money per request, so it gets
+two layers of protection:
+
+1. **Rate limit — 20 requests/IP/60s.** An in-memory fixed-window limiter
+   keyed by client IP (`lib/security/rate-limit.ts`) returns a designed
+   429 with `Retry-After`. Because it runs inside the serverless instance,
+   the budget is per-instance rather than global — the documented trade-off
+   for staying dependency-free; a production team would layer Vercel's WAF
+   rate limiting on top.
+2. **Input caps — `lib/security/chat-guard.ts`.** Before the prompt is even
+   built the route rejects an empty body (400), more than 60 messages (413),
+   a single message over 12,000 characters (413), or a total payload over
+   80,000 characters (413). Text is measured from both the legacy `content`
+   and the AI SDK `parts` shapes, so even a limiter bypass can burn only a
+   bounded number of tokens.
+
+## Testing
+
+Tests are the contract for verified changes. Conventions:
+
+- Components are queried the way a user queries the page (role/label, never
+  test IDs).
+- The AI route is always mocked at the transport boundary — `@ai-sdk/react`
+  in Vitest, `page.route` in Playwright — so the real Gemini API is never
+  called during tests.
+- `npm run lint`, `npm run build`, `npm run test`, and `npm run e2e` all
+  run in CI on push and block merges.
+
+Key suites:
+
+- `components/__tests__/chat.test.tsx` — the highest-risk UI: empty,
+  pending, streaming, stop, error and retry.
+- `components/__tests__/settings-form.test.tsx`, `task-form.test.tsx` —
+  validated forms (zod, `noValidate`, a11y attributes).
+- `components/__tests__/signature-hero.test.tsx` — WebGL detection and the
+  static fallback.
+- `lib/__tests__/chat-guard.test.ts` + `rate-limit.test.ts` — the chat
+  route's abuse defence.
+- `e2e/chat-error.spec.ts` (mock-served failure → retry) and
+  `e2e/chat.spec.ts` (primary flow) cover the chat end-to-end.
+- `e2e/skeleton.spec.ts` — every screen loads without horizontal overflow
+  at 375px and 1280px, across all four browser projects.
+
+## Shipping flow
+
+Branch → PR → CI + Vercel preview → squash-merge → auto-deploy to
+production from `main`. Conventional Commits throughout.
 
 ## Project status
 
-## Env vars
+Shipped, tested, and running in production. See "Feature work" below for
+the full arc; every item is deployed and verified end-to-end.
 
-See [.env.example](.env.example). `GOOGLE_GENERATIVE_AI_API_KEY` is required for `/stream`
-(the server route handler reads it; it never reaches the browser). Get a free key at
-https://aistudio.google.com/apikey — no billing required.
-
-> **Week 6 · FE-06 streaming AI chat** — Gemini-powered conversation via the
-> AI SDK (`app/api/chat` + `components/chat.tsx`): token-by-token streaming,
-> Stop mid-stream, localStorage persistence, and bottom-pinned auto-scroll
-> with a jump-to-latest affordance.
+> **Week 6 · FE-06 streaming AI chat** — Gemini conversation via the AI SDK
+> (`app/api/chat` + `components/chat.tsx`): token-by-token streaming, Stop
+> mid-stream, localStorage persistence, bottom-pinned auto-scroll with a
+> jump-to-latest affordance.
 >
-> **FE-07 tool results & structured output** — `scoreFeature` (typed Zod input,
-> deterministic output) renders as a bespoke score card; `clearConversation` is
-> a user-interaction tool with a confirmation card; every tool-part state has a
-> distinct, designed treatment including a failure card.
+> **FE-07 tool results & structured output** — `scoreFeature` (typed Zod
+> input) renders as a bespoke score card; `clearConversation` is a
+> user-interaction tool with a confirmation card; every tool-part state has
+> a distinct, designed treatment including a failure card.
+>
+> **FE-08 error, empty & edge states** — mid-stream failure renders a
+> designed error banner with a "Retry last message" (double-click safe) plus
+> Dismiss; route-level error boundaries (`app/error.tsx`,
+> `app/stream/error.tsx`); a layout-matched thinking skeleton; a first-run
+> empty state with click-to-fill suggestions; mobile Safari fixes (`dvh`
+> height, `overscroll-contain`).
+>
+> **FE-AA1 Buttons with a Brain** — `components/stateful-button.tsx`
+> choreographs idle → hover/focus → loading → success/error → idle as a
+> fixed-width FSM with transform/opacity-only transitions. Spam-click safe,
+> keyboard-focusable with a visible ring, `prefers-reduced-motion` drops
+> motion but never feedback. Demo page `/microinteractions`.
 >
 > **FE-AA2 First 3D experience** — `/3d` renders a staged product scene in
 > React Three Fiber: orbit/zoom, tap-to-select any of four parts, and a
-> configurator that restyles the material (color, metalness, roughness,
-> wireframe) plus auto-rotate speed. **Perf note:** the scene is entirely
-> procedural primitives — no external GLB/DRACO bytes — and the whole Three.js
-> stack is dynamic-imported only after clicking "Launch 3D studio", so the page
-> shell never pays for it. The canvas caps pixel ratio at 2 and keeps the scene
-> to a handful of meshes, one shadow-casting light and a cursor light. It also
-> respects `prefers-reduced-motion` and a WebGL support check with a static
-> fallback card. **With more time:** load a real DRACO-compressed GLB with a
-> drag-and-drop viewer, add env-mapped reflections via drei `<Environment>`, and
-> report live FPS in the corner (FE-10 lens).
+> configurator (color, metalness, roughness, wireframe) plus auto-rotate.
+> The whole Three.js stack is dynamically imported only after clicking
+> "Launch 3D studio", DPR is capped, meshes are procedural (no external
+> GLB bytes), and it respects `prefers-reduced-motion` with a static
+> fallback card.
 >
-> **FE-AA3 Signature hero** — `/hero` is a fullscreen personalised aurora painted
-> by a hand-written fragment shader (`signature-hero-scene.tsx`). All three core
-> uniforms are wired: `u_time` drives slow-scrolling noise, `u_resolution` keeps
-> the field aspect-correct on every viewport, and `u_mouse` gently leans the flow
-> toward the cursor while placing a soft glow under the pointer. The palette is a
-> brand-remixed ramp (deep indigo → indigo → violet accent) with a film-grain pass
-> on top and a vignette that keeps overlaid text readable. **Perf fallback:** DPR is
-> capped at 1.75, the timeline pauses when the tab is hidden (`document.hidden`),
-> and `prefers-reduced-motion` or missing WebGL swap the canvas for a static
-> gradient in the same palette so the headline still shows.
+> **FE-AA3 Signature hero** — `/hero` is a fullscreen personalised aurora
+> painted by a hand-written fragment shader. All three core uniforms are
+> wired: `u_time` drives slow noise, `u_resolution` keeps the field
+> aspect-correct, `u_mouse` leans the flow toward the cursor with a soft
+> glow beneath the pointer. Brand-remixed palette, film-grain pass, and a
+> vignette that keeps overlays readable. DPR capped at 1.75, renders pause
+> when the tab is hidden, and reduced-motion/missing-WebGL swap the canvas
+> for a static gradient in the same palette.
 >
-> **FE-AA1 Buttons with a Brain** — `components/stateful-button.tsx` choreographs
-> idle → hover/focus → loading → success/error → back to idle with a fixed-width
-> FSM and transform/opacity-only transitions (220ms easeOutQuint entrances,
-> 120ms ease-in exits, 900ms success hold, 400ms error shake). Spam-click safe,
-> keyboard focused with a visible ring, and `prefers-reduced-motion` drops motion
-> but never feedback. Demo page `/microinteractions` ships forced success/error
-> triggers.
+> **FE-05 accessible component fundamentals** — hand-built modal, tabs, and
+> disclosure (W3C APG patterns) with keyboard-only Playwright coverage and a
+> playground comparing against shadcn/ui's Radix dialog/tabs. Includes a
+> Safari fix: WebKit doesn't focus buttons on click, so the dialog trigger
+> explicitly focuses itself before opening to guarantee return-of-focus.
 >
-> **FE-08 error, empty & edge states** — mid-stream failure renders a designed
-> error banner with a "Retry last message" that re-runs only the interrupted
-> reply (double-click safe) plus Dismiss; route-level error boundaries in
-> `app/error.tsx` / `app/stream/error.tsx`; a layout-matched thinking skeleton;
-> first-run empty state with click-to-fill suggestions; and mobile Safari fixes
-> (`dvh` height, `overscroll-contain`). Automated sabotage covered in
-> `e2e/chat-error.spec.ts`.
+> **FE-09 verified quality bar** — expanded unit + E2E coverage; the AI
+> route mocked at the transport boundary; lint/build/test/e2e gating in CI.
 >
-> **Week 5 · FE-05 accessible component fundamentals** — hand-built modal,
-> tabs, and disclosure (W3C APG patterns) with keyboard-only Playwright
-> coverage and a playground comparing against shadcn/ui's Radix dialog/tabs.
+> **FE-11 production hardening** — cross-browser E2E now runs Chromium,
+> Firefox, WebKit (desktop), and WebKit mobile (Safari); the chat route
+> gained the rate limiter and input caps described above; this README.

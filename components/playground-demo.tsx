@@ -92,7 +92,10 @@ export default function PlaygroundDemo() {
         </p>
         <button
           type="button"
-          onClick={() => setDialogOpen(true)}
+          onClick={(e) => {
+            (e.currentTarget as HTMLButtonElement).focus();
+            setDialogOpen(true);
+          }}
           className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white"
         >
           Open dialog
