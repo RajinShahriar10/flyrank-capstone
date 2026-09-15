@@ -23,7 +23,7 @@ export default function TaskItem({
         />
         <div>
           <p
-            className={task.completed ? "text-slate-400 line-through" : undefined}
+            className={task.completed ? "text-slate-500 line-through" : undefined}
           >
             {task.title}
           </p>

@@ -163,4 +163,10 @@
   html {
     @apply font-sans;
   }
+  /* Keyboard-only focus baseline for hand-built controls (FE-10). Components
+     that bring their own focus-visible ring keep it via the utilities layer. */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+  }
 }
