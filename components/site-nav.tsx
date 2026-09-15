@@ -27,9 +27,9 @@ export default function SiteNav() {
               <Link
                 href={link.href}
                 aria-current={active ? "page" : undefined}
-                className={`inline-block rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                className={`inline-block rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 ${
                   active
-                    ? "bg-brand-500 text-white"
+                    ? "bg-brand-600 text-white"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >

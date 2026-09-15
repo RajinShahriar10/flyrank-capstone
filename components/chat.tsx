@@ -172,6 +172,8 @@ export default function Chat() {
           onScroll={handleScroll}
           role="log"
           aria-label="Chat conversation"
+          aria-live="polite"
+          aria-busy={active}
           className="overscroll-contain flex h-full flex-col gap-4 overflow-y-auto p-4"
         >
           {messages.length === 0 && (
@@ -261,12 +263,13 @@ export default function Chat() {
           placeholder="Ask about CraftUI…"
           autoComplete="off"
           enterKeyHint="send"
-          className="h-11 min-w-0 flex-1 rounded-md border border-slate-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          className="h-11 min-w-0 flex-1 rounded-md border border-slate-300 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
         />
         {active ? (
           <button
             type="button"
             onClick={() => void stop()}
+            aria-label="Stop generating"
             className="inline-flex h-11 items-center gap-2 rounded-md bg-slate-900 px-4 text-sm font-medium text-white"
           >
             <SquareIcon className="size-3.5" aria-hidden="true" />

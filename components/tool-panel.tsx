@@ -89,7 +89,7 @@ function StreamingCard({ label, note }: { label: string; note: string }) {
       <Loader2Icon className="size-4 shrink-0 animate-spin text-brand-600" aria-hidden="true" />
       <div className="min-w-0">
         <p className="truncate text-sm font-medium text-slate-800">{label}</p>
-        <p className="truncate text-xs text-slate-400">{note}</p>
+        <p className="truncate text-xs text-slate-500">{note}</p>
       </div>
     </div>
   );
@@ -115,7 +115,7 @@ function ClearConversationCard({
           : "The assistant is asking to start over."}
       </p>
       {parsed.success && parsed.data.remainingMessages > 0 && (
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-slate-500">
           This removes the {parsed.data.remainingMessages} user message
           {parsed.data.remainingMessages === 1 ? "" : "s"} so far. This cannot be undone.
         </p>
@@ -169,7 +169,7 @@ function CompletedCard({ invocation }: { invocation: ToolInvocationLike }) {
       </span>
       <div className="min-w-0">
         <p className="truncate text-sm font-medium text-slate-800">{invocation.toolName}</p>
-        <p className="truncate text-xs text-slate-400">Completed</p>
+        <p className="truncate text-xs text-slate-500">Completed</p>
       </div>
     </div>
   );

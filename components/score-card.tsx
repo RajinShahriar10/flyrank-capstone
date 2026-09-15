@@ -18,7 +18,7 @@ export function ScoreCard({ result }: { result: ScoreFeatureOutput }) {
     <div className="w-full min-w-[16rem] max-w-sm overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-4 pb-3 pt-4">
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Feature score
           </p>
           <h3 className="mt-0.5 truncate text-base font-semibold text-slate-900">
@@ -36,7 +36,7 @@ export function ScoreCard({ result }: { result: ScoreFeatureOutput }) {
         <div>
           <p className="text-4xl font-bold tracking-tight text-brand-700">
             {result.score}
-            <span className="text-sm font-medium text-slate-400">/100</span>
+            <span className="text-sm font-medium text-slate-500">/100</span>
           </p>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
             <div
