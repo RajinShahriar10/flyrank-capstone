@@ -75,7 +75,13 @@ export function Dialog({ open, onClose, title, children }: DialogProps) {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
-      previouslyFocused.current?.focus();
+      // WebKit moves focus to <body> asynchronously when the focused dialog is
+      // removed from the DOM; restore the trigger in the next frame so our
+      // programmatic focus() wins instead of being clobbered by that default.
+      const restoreFocusTo = previouslyFocused.current;
+      requestAnimationFrame(() => {
+        restoreFocusTo?.focus();
+      });
     };
   }, [open, onClose]);
 

@@ -40,9 +40,9 @@ jobs:
         run: npm run test
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium firefox webkit
 
-      - name: E2E tests (Playwright)
+      - name: E2E tests (Playwright, Chromium + Firefox + WebKit desktop/mobile)
         run: npm run e2e
         working-directory: ./
 
