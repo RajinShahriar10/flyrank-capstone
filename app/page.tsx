@@ -31,6 +31,11 @@ const screens = [
     title: "AI chat",
     description: "Token-by-token streaming conversation with Gemini.",
   },
+  {
+    href: "/hero",
+    title: "Signature hero",
+    description: "A fullscreen fragment shader painted in the CraftUI palette.",
+  },
 ];
 
 export default function Home() {

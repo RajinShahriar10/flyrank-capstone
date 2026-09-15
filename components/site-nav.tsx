@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/stream", label: "Chat" },
   { href: "/playground", label: "Playground" },
   { href: "/3d", label: "3D" },
+  { href: "/hero", label: "Hero" },
 ];
 
 export default function SiteNav() {

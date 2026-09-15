@@ -38,6 +38,7 @@ Deployed on Vercel from the `main` branch; every push also builds an isolated pr
 | `/stream` | AI chat | Token-by-token streaming chat with Gemini via the Vercel AI SDK, with two server tools rendered as real components |
 | `/microinteractions` | Buttons with a Brain | Stateful button demo (FE-AA1): idle → loading → success/error lifecycle with forced-outcome triggers |
 | `/3d` | 3D product studio | React Three Fiber product stage (FE-AA2): orbit/zoom, tap-to-select parts, material configurator; lazy-loaded with reduced-motion fallback |
+| `/hero` | Signature hero | Fullscreen aurora fragment shader (FE-AA3) with headline overlay; `u_time`/`u_resolution`/`u_mouse`, DPR capped, pauses when hidden, `prefers-reduced-motion` falls back to a static gradient |
 
 ## Tool contract (`/stream`)
 
@@ -117,6 +118,17 @@ https://aistudio.google.com/apikey — no billing required.
 > fallback card. **With more time:** load a real DRACO-compressed GLB with a
 > drag-and-drop viewer, add env-mapped reflections via drei `<Environment>`, and
 > report live FPS in the corner (FE-10 lens).
+>
+> **FE-AA3 Signature hero** — `/hero` is a fullscreen personalised aurora painted
+> by a hand-written fragment shader (`signature-hero-scene.tsx`). All three core
+> uniforms are wired: `u_time` drives slow-scrolling noise, `u_resolution` keeps
+> the field aspect-correct on every viewport, and `u_mouse` gently leans the flow
+> toward the cursor while placing a soft glow under the pointer. The palette is a
+> brand-remixed ramp (deep indigo → indigo → violet accent) with a film-grain pass
+> on top and a vignette that keeps overlaid text readable. **Perf fallback:** DPR is
+> capped at 1.75, the timeline pauses when the tab is hidden (`document.hidden`),
+> and `prefers-reduced-motion` or missing WebGL swap the canvas for a static
+> gradient in the same palette so the headline still shows.
 >
 > **FE-AA1 Buttons with a Brain** — `components/stateful-button.tsx` choreographs
 > idle → hover/focus → loading → success/error → back to idle with a fixed-width
