@@ -39,7 +39,8 @@ test.describe("hand-built tabs", () => {
   test("arrow keys, Home and End activate tabs; Tab moves into the panel", async ({
     page,
   }) => {
-    const tablist = page.getByRole("tablist", { name: "Hand-built tabs" });
+    const section = page.getByRole("region", { name: "Tabs (hand-built)" });
+    const tablist = section.getByRole("tablist", { name: "Hand-built tabs" });
     const overview = tablist.getByRole("tab", { name: "Overview" });
     const keyboardTab = tablist.getByRole("tab", { name: "Keyboard" });
     const focusTab = tablist.getByRole("tab", { name: "Focus" });
@@ -51,7 +52,7 @@ test.describe("hand-built tabs", () => {
     await expect(keyboardTab).toBeFocused();
     await expect(keyboardTab).toHaveAttribute("aria-selected", "true");
     await expect(
-      tablist.getByRole("tabpanel", { name: "Keyboard" }),
+      section.getByRole("tabpanel", { name: "Keyboard" }),
     ).toBeVisible();
 
     await page.keyboard.press("ArrowRight");
@@ -68,7 +69,7 @@ test.describe("hand-built tabs", () => {
     // Roving tabindex: inactive tabs are skipped, so the next Tab lands in
     // the active tab panel.
     await page.keyboard.press("Tab");
-    await expect(tablist.getByRole("tabpanel", { name: "Overview" })).toBeFocused();
+    await expect(section.getByRole("tabpanel", { name: "Overview" })).toBeFocused();
 
     await page.keyboard.press("Shift+Tab");
     await expect(overview).toBeFocused();
