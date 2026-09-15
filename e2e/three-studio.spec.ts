@@ -12,8 +12,9 @@ test("3D studio launches on demand and exposes the configurator", async ({ page 
 
   await launch.click();
 
-  // The scene mounts and the configurator becomes interactive.
-  await expect(page.locator("canvas")).toBeVisible();
+  // The scene mounts and the configurator becomes interactive. The WebGL bundle
+  // is a client-side dynamic import, so give the slower engines headroom.
+  await expect(page.locator("canvas")).toBeVisible({ timeout: 15_000 });
   await expect(page.getByLabel(/metalness/i)).toBeVisible();
 
   // Interacting with the configurator updates state without breaking the page.
