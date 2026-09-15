@@ -48,37 +48,39 @@ export function Tabs({ label, items }: TabsProps) {
   }
 
   return (
-    <div
-      role="tablist"
-      aria-label={label}
-      onKeyDown={handleKeyDown}
-      className="flex gap-1 border-b border-slate-200"
-    >
-      {items.map((item, index) => {
-        const selected = index === activeIndex;
-        return (
-          <button
-            key={item.label}
-            type="button"
-            role="tab"
-            id={`${baseId}-tab-${index}`}
-            aria-selected={selected}
-            aria-controls={`${baseId}-panel-${index}`}
-            tabIndex={selected ? 0 : -1}
-            ref={(node) => {
-              tabRefs.current[index] = node;
-            }}
-            onClick={() => setActiveIndex(index)}
-            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
-              selected
-                ? "border-brand-500 text-brand-700"
-                : "border-transparent text-slate-500 hover:text-slate-900"
-            }`}
-          >
-            {item.label}
-          </button>
-        );
-      })}
+    <div className="w-full">
+      <div
+        role="tablist"
+        aria-label={label}
+        onKeyDown={handleKeyDown}
+        className="flex gap-1 border-b border-slate-200"
+      >
+        {items.map((item, index) => {
+          const selected = index === activeIndex;
+          return (
+            <button
+              key={item.label}
+              type="button"
+              role="tab"
+              id={`${baseId}-tab-${index}`}
+              aria-selected={selected}
+              aria-controls={`${baseId}-panel-${index}`}
+              tabIndex={selected ? 0 : -1}
+              ref={(node) => {
+                tabRefs.current[index] = node;
+              }}
+              onClick={() => setActiveIndex(index)}
+              className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
+                selected
+                  ? "border-brand-500 text-brand-700"
+                  : "border-transparent text-slate-500 hover:text-slate-900"
+              }`}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
 
       {items.map((item, index) => {
         const selected = index === activeIndex;
